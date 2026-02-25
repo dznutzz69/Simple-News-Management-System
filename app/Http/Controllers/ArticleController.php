@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 use App\Models\Article;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Resources\ArticleResource;
 
 class ArticleController extends Controller
 {
     public function index()
     {
-        return response()->json(Article::with(['category', 'user'])->get());
+        $articles = Article::with(['category', 'user'])->get();
+        return ArticleResource::collection($articles);
     }
 
     public function store(Request $request)
@@ -21,12 +23,13 @@ class ArticleController extends Controller
         ]);
 
         $article = Auth::user()->articles()->create($validated);
-        return response()->json($article, 201);
+        
+        return new ArticleResource($article->load(['category', 'user']));
     }
 
     public function show(Article $article)
     {
-        return response()->json($article->load(['category', 'user']));
+       return new ArticleResource($article->load(['category', 'user']));
     }
 
     public function update(Request $request, Article $article)
@@ -41,8 +44,7 @@ class ArticleController extends Controller
             'content' => 'sometimes|required|string',
         ]);
 
-        $article->update($validated);
-        return response()->json($article);
+        return new ArticleResource($article->load(['category', 'user']));
     }
 
     public function destroy(Article $article)

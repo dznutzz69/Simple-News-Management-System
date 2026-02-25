@@ -3,28 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use App\Http\Resources\ArticleResource; // Import the Resource
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PublicNewsController extends Controller
 {
-
-    //DEV 9 SEARCH FUNCTION (OBSOLETE)
-    // public function index()
-    // {
-    //     $articles = Article::with(['category', 'user'])
-    //         ->where('status', 'published')
-    //         ->latest()
-    //         ->get();
-
-    //     return response()->json($articles);
-    // }
-
-     public function index(Request $request)
+    /**
+     * Display a listing of published articles with search and filter functionality.
+     */
+    public function index(Request $request)
     {
+        // Start the query with eager loading to prevent N+1 issues
         $query = Article::with(['category', 'user'])->where('status', 'published');
 
-        // Dev 9 Search Logic
+        // Dev 9 Search Logic: Filter by title or content
         if ($request->has('search')) {
             $searchTerm = $request->search;
             $query->where(function($q) use ($searchTerm) {
@@ -33,16 +26,19 @@ class PublicNewsController extends Controller
             });
         }
 
-        // Dev 10 Filter Logic
+        // Dev 10 Filter Logic: Filter by category
         if ($request->has('category_id')) {
             $query->where('category_id', $request->category_id);
         }
 
-        // Optional: Expose draft filtering for authenticated routes if needed
+        // Optional: Allow authenticated users to view different statuses
         if ($request->has('status') && Auth::check()) {
              $query->where('status', $request->status);
         }
 
-        return response()->json($query->latest()->get());
+        // Execute query and return via ArticleResource collection
+        $articles = $query->latest()->get();
+        
+        return ArticleResource::collection($articles);
     }
 }
