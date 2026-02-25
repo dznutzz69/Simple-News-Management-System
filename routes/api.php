@@ -11,3 +11,4 @@ Route::get('/user', function (Request $request) {
 Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 Route::middleware('auth:sanctum')->apiResource('articles', ArticleController::class);
+Route::middleware('auth:sanctum')->apiResource('categories', CategoryController::class);'categories', CategoryController::class);
