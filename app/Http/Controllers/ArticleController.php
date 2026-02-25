@@ -2,7 +2,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreArticleRequest;
+use App\Http\Requests\UpdateArticleRequest;
 use Illuminate\Support\Facades\Auth;
 
 class ArticleController extends Controller
@@ -12,13 +13,10 @@ class ArticleController extends Controller
         return response()->json(Article::with(['category', 'user'])->get());
     }
 
-    public function store(Request $request)
+    public function store(StoreArticleRequest $request)
     {
-        $validated = $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-        ]);
+        // The incoming request is already validated!
+        $validated = $request->validated();
 
         $article = Auth::user()->articles()->create($validated);
         return response()->json($article, 201);
@@ -29,17 +27,11 @@ class ArticleController extends Controller
         return response()->json($article->load(['category', 'user']));
     }
 
-    public function update(Request $request, Article $article)
+    public function update(UpdateArticleRequest $request, Article $article)
     {
-        if ($article->user_id !== Auth::id()) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        $validated = $request->validate([
-            'category_id' => 'sometimes|required|exists:categories,id',
-            'title' => 'sometimes|required|string|max:255',
-            'content' => 'sometimes|required|string',
-        ]);
+        // Authorization is already handled in the Form Request!
+        // Validation is already handled!
+        $validated = $request->validated();
 
         $article->update($validated);
         return response()->json($article);
@@ -54,6 +46,7 @@ class ArticleController extends Controller
         $article->delete();
         return response()->json(['message' => 'Article deleted']);
     }
+
     public function publish(Article $article)
     {
         if ($article->user_id !== Auth::id()) {
