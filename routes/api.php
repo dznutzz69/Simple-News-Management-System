@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\CategoryController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -14,4 +15,4 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 Route::post('/register', [AuthController::class, 'register']);
 Route::middleware('auth:sanctum')->apiResource('articles', ArticleController::class);
-Route::middleware('auth:sanctum')->apiResource('categories', CategoryController::class);'categories', CategoryController::class);
+Route::middleware('auth:sanctum')->apiResource('categories', CategoryController::class);
